@@ -2,342 +2,1361 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cloud Jumper</title>
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Box Warriors</title>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        touch-action: none;
-    }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
 
-    body {
-        overflow: hidden;
-        background: linear-gradient(#69c7ff, #dff6ff);
-        font-family: Arial, sans-serif;
-    }
+body {
+    background: #111827;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    color: white;
+}
 
-    canvas {
-        display: block;
-        margin: auto;
-        background: linear-gradient(#65c5ff, #e8f9ff);
-    }
+/* ================= MENU ================= */
 
-    #score {
-        position: fixed;
-        top: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        font-size: 28px;
-        font-weight: bold;
-        text-shadow: 2px 2px 5px #333;
-        z-index: 10;
-    }
+.screen {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
 
-    #controls {
-        position: fixed;
-        bottom: 25px;
-        width: 100%;
+.screen.active {
+    display: flex;
+}
+
+.menu-box {
+    text-align: center;
+    background: #1f2937;
+    padding: 40px;
+    border-radius: 20px;
+    width: min(90%, 420px);
+    box-shadow: 0 10px 40px black;
+}
+
+.logo {
+    font-size: 48px;
+    margin-bottom: 10px;
+    color: #facc15;
+}
+
+.subtitle {
+    color: #9ca3af;
+    margin-bottom: 30px;
+}
+
+.menu-button {
+    width: 100%;
+    padding: 16px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #374151;
+    color: white;
+    transition: 0.2s;
+}
+
+.menu-button:hover {
+    background: #4b5563;
+    transform: scale(1.03);
+}
+
+.play {
+    background: #22c55e;
+}
+
+.multi {
+    background: #3b82f6;
+}
+
+.back {
+    background: #ef4444;
+}
+
+/* ================= GAME ================= */
+
+#gameScreen {
+    position: relative;
+}
+
+canvas {
+    display: block;
+    background:
+        radial-gradient(circle at center,
+        #374151,
+        #111827);
+}
+
+/* ================= HUD ================= */
+
+#hud {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+.hud-text {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.health-container {
+    width: 200px;
+    height: 20px;
+    background: #450a0a;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+#healthBar {
+    width: 100%;
+    height: 100%;
+    background: #22c55e;
+    transition: width 0.2s;
+}
+
+/* ================= MOBILE ================= */
+
+#mobileControls {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    display: none;
+    justify-content: space-between;
+    padding: 0 25px;
+    z-index: 20;
+}
+
+.control-group {
+    display: flex;
+    gap: 10px;
+}
+
+.control-button {
+    width: 65px;
+    height: 65px;
+    border: none;
+    border-radius: 50%;
+    font-size: 25px;
+    background: rgba(255,255,255,0.8);
+}
+
+.attack-button {
+    background: #ef4444;
+    color: white;
+}
+
+/* ================= ROOM ================= */
+
+input {
+    width: 100%;
+    padding: 15px;
+    margin: 15px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.room-id {
+    background: #111827;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 10px;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: #facc15;
+}
+
+@media (max-width: 700px) {
+
+    #mobileControls {
         display: flex;
-        justify-content: space-between;
-        padding: 0 35px;
     }
 
-    button {
-        width: 75px;
-        height: 75px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.75);
-        font-size: 30px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    .logo {
+        font-size: 38px;
     }
 
-    button:active {
-        transform: scale(0.92);
-    }
-
-    #gameOver {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        background: rgba(255,255,255,0.9);
-        padding: 30px;
-        border-radius: 20px;
-        z-index: 20;
-    }
-
-    #gameOver h1 {
-        color: #333;
-        margin-bottom: 15px;
-    }
-
-    #restart {
-        width: auto;
-        height: auto;
-        border-radius: 10px;
-        padding: 12px 25px;
-        background: #4caf50;
-        color: white;
-        font-size: 18px;
-    }
+}
 </style>
 </head>
 
 <body>
 
-<div id="score">Score: 0</div>
+<!-- ================= MAIN MENU ================= -->
 
-<div id="gameOver">
-    <h1>Game Over!</h1>
-    <p id="finalScore"></p>
-    <br>
-    <button id="restart">Play Again</button>
+<div id="mainMenu" class="screen active">
+
+    <div class="menu-box">
+
+        <div class="logo">⬛ BOX WARRIORS</div>
+
+        <p class="subtitle">
+            Fight monsters. Survive waves. Become stronger.
+        </p>
+
+        <button
+        class="menu-button play"
+        onclick="startSolo()">
+        🎮 SOLO PLAY
+        </button>
+
+        <button
+        class="menu-button multi"
+        onclick="showScreen('multiplayerMenu')">
+        👥 MULTIPLAYER
+        </button>
+
+        <button
+        class="menu-button"
+        onclick="showHowToPlay()">
+        ❓ HOW TO PLAY
+        </button>
+
+    </div>
+
 </div>
 
-<canvas id="game"></canvas>
 
-<div id="controls">
-    <button id="left">⬅</button>
-    <button id="right">➡</button>
+<!-- ================= MULTIPLAYER MENU ================= -->
+
+<div id="multiplayerMenu" class="screen">
+
+    <div class="menu-box">
+
+        <div class="logo">👥 MULTIPLAYER</div>
+
+        <button
+        class="menu-button play"
+        onclick="createRoom()">
+        ➕ CREATE ROOM
+        </button>
+
+        <button
+        class="menu-button multi"
+        onclick="showScreen('joinRoomMenu')">
+        🔗 JOIN ROOM
+        </button>
+
+        <button
+        class="menu-button back"
+        onclick="showScreen('mainMenu')">
+        ⬅ BACK
+        </button>
+
+    </div>
+
 </div>
+
+
+<!-- ================= CREATE ROOM ================= -->
+
+<div id="createRoomMenu" class="screen">
+
+    <div class="menu-box">
+
+        <h2>YOUR ROOM ID</h2>
+
+        <div
+        id="roomIdDisplay"
+        class="room-id">
+        ------
+        </div>
+
+        <p>
+            Share this Room ID with your friend.
+        </p>
+
+        <br>
+
+        <button
+        class="menu-button play"
+        onclick="startMultiplayerDemo()">
+        🎮 START GAME
+        </button>
+
+        <button
+        class="menu-button back"
+        onclick="showScreen('multiplayerMenu')">
+        ⬅ BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= JOIN ROOM ================= -->
+
+<div id="joinRoomMenu" class="screen">
+
+    <div class="menu-box">
+
+        <h2>JOIN ROOM</h2>
+
+        <input
+        id="roomInput"
+        placeholder="Enter Room ID"
+        maxlength="6">
+
+        <button
+        class="menu-button play"
+        onclick="joinRoom()">
+        JOIN GAME
+        </button>
+
+        <button
+        class="menu-button back"
+        onclick="showScreen('multiplayerMenu')">
+        ⬅ BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= GAME ================= -->
+
+<div id="gameScreen" class="screen">
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud">
+
+        <div class="hud-text">
+            ❤️ HEALTH
+        </div>
+
+        <div class="health-container">
+            <div id="healthBar"></div>
+        </div>
+
+        <br>
+
+        <div class="hud-text">
+            🪙 Score: <span id="score">0</span>
+        </div>
+
+        <div class="hud-text">
+            👾 Wave: <span id="wave">1</span>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MOBILE CONTROLS ================= -->
+
+<div id="mobileControls">
+
+    <div class="control-group">
+
+        <button
+        class="control-button"
+        id="leftButton">
+        ⬅
+        </button>
+
+        <button
+        class="control-button"
+        id="rightButton">
+        ➡
+        </button>
+
+    </div>
+
+    <div class="control-group">
+
+        <button
+        class="control-button attack-button"
+        id="attackButton">
+        ⚔️
+        </button>
+
+    </div>
+
+</div>
+
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+
+/* ================= SCREENS ================= */
+
+function showScreen(id) {
+
+    document.querySelectorAll(".screen")
+    .forEach(screen => {
+        screen.classList.remove("active");
+    });
+
+    document
+    .getElementById(id)
+    .classList.add("active");
+
+}
+
+
+/* ================= GAME VARIABLES ================= */
+
+const canvas =
+document.getElementById("gameCanvas");
+
+const ctx =
+canvas.getContext("2d");
 
 function resizeCanvas() {
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
 }
+
+window.addEventListener(
+"resize",
+resizeCanvas
+);
 
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+
+
+let gameRunning = false;
+
+let score = 0;
+
+let wave = 1;
+
+let monsters = [];
+
+let multiplayerMode = false;
+
+
+/* ================= PLAYER ================= */
 
 const player = {
+
     x: 0,
+
     y: 0,
-    width: 40,
-    height: 50,
-    velocityX: 0,
-    velocityY: -12,
-    speed: 0.7,
-    maxSpeed: 7,
-    gravity: 0.5
+
+    size: 45,
+
+    speed: 6,
+
+    health: 100,
+
+    maxHealth: 100,
+
+    attacking: false,
+
+    attackTimer: 0,
+
+    direction: 1
+
 };
 
-let platforms = [];
-let score = 0;
-let gameRunning = true;
-let keys = {};
 
-function createPlatforms() {
-    platforms = [];
+/* ================= KEYS ================= */
 
-    for (let i = 0; i < 8; i++) {
-        platforms.push({
-            x: Math.random() * (canvas.width - 120),
-            y: canvas.height - (i * 110) - 40,
-            width: 110,
-            height: 22
-        });
-    }
+const keys = {};
+
+
+/* ================= START SOLO ================= */
+
+function startSolo() {
+
+    multiplayerMode = false;
+
+    startGame();
+
 }
 
-function resetGame() {
-    player.x = canvas.width / 2 - player.width / 2;
-    player.y = canvas.height - 150;
-    player.velocityX = 0;
-    player.velocityY = -12;
+
+/* ================= START GAME ================= */
+
+function startGame() {
+
+    showScreen("gameScreen");
+
+    player.x =
+    canvas.width / 2;
+
+    player.y =
+    canvas.height / 2;
+
+    player.health = 100;
 
     score = 0;
+
+    wave = 1;
+
+    monsters = [];
+
     gameRunning = true;
 
-    createPlatforms();
+    spawnWave();
 
-    document.getElementById("gameOver").style.display = "none";
+    gameLoop();
+
 }
 
-function drawCloud(x, y, width) {
-    ctx.fillStyle = "white";
 
-    ctx.beginPath();
-    ctx.arc(x + 25, y + 15, 20, 0, Math.PI * 2);
-    ctx.arc(x + 50, y + 5, 25, 0, Math.PI * 2);
-    ctx.arc(x + 80, y + 15, 20, 0, Math.PI * 2);
-    ctx.fill();
+/* ================= PLAYER MOVEMENT ================= */
 
-    ctx.fillRect(x + 20, y + 15, width - 40, 20);
+window.addEventListener(
+"keydown",
+event => {
+
+    keys[event.key.toLowerCase()] =
+    true;
+
+    if (
+        event.code === "Space"
+    ) {
+
+        attack();
+
+    }
+
 }
+);
 
-function drawPlayer() {
-    // Character body
-    ctx.fillStyle = "#ff5252";
-    ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    // Face
-    ctx.fillStyle = "#ffe0bd";
-    ctx.beginPath();
-    ctx.arc(
-        player.x + player.width / 2,
-        player.y + 15,
-        13,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
+window.addEventListener(
+"keyup",
+event => {
 
-    // Eyes
-    ctx.fillStyle = "#222";
-    ctx.fillRect(player.x + 12, player.y + 12, 3, 5);
-    ctx.fillRect(player.x + 25, player.y + 12, 3, 5);
+    keys[event.key.toLowerCase()] =
+    false;
+
 }
+);
+
+
+/* ================= UPDATE PLAYER ================= */
 
 function updatePlayer() {
-    if (keys["ArrowLeft"] || keys["a"]) {
-        player.velocityX -= player.speed;
+
+    if (
+        keys["a"] ||
+        keys["arrowleft"]
+    ) {
+
+        player.x -=
+        player.speed;
+
+        player.direction = -1;
+
     }
 
-    if (keys["ArrowRight"] || keys["d"]) {
-        player.velocityX += player.speed;
+    if (
+        keys["d"] ||
+        keys["arrowright"]
+    ) {
+
+        player.x +=
+        player.speed;
+
+        player.direction = 1;
+
     }
 
-    player.velocityX *= 0.85;
+    if (
+        keys["w"] ||
+        keys["arrowup"]
+    ) {
 
-    if (player.velocityX > player.maxSpeed) {
-        player.velocityX = player.maxSpeed;
+        player.y -=
+        player.speed;
+
     }
 
-    if (player.velocityX < -player.maxSpeed) {
-        player.velocityX = -player.maxSpeed;
+    if (
+        keys["s"] ||
+        keys["arrowdown"]
+    ) {
+
+        player.y +=
+        player.speed;
+
     }
 
-    player.velocityY += player.gravity;
 
-    player.x += player.velocityX;
-    player.y += player.velocityY;
+    /* Keep player inside screen */
 
-    // Screen boundaries
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) {
-        player.x = canvas.width - player.width;
+    player.x =
+    Math.max(
+        0,
+        Math.min(
+            canvas.width -
+            player.size,
+            player.x
+        )
+    );
+
+    player.y =
+    Math.max(
+        0,
+        Math.min(
+            canvas.height -
+            player.size,
+            player.y
+        )
+    );
+
+}
+
+
+/* ================= DRAW PLAYER ================= */
+
+function drawPlayer() {
+
+    /* Shadow */
+
+    ctx.fillStyle =
+    "rgba(0,0,0,0.3)";
+
+    ctx.fillRect(
+        player.x + 5,
+        player.y +
+        player.size + 5,
+        player.size,
+        8
+    );
+
+
+    /* Box body */
+
+    ctx.fillStyle =
+    "#3b82f6";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.size,
+        player.size
+    );
+
+
+    /* Face */
+
+    ctx.fillStyle =
+    "white";
+
+    ctx.fillRect(
+        player.x + 10,
+        player.y + 12,
+        7,
+        7
+    );
+
+    ctx.fillRect(
+        player.x + 28,
+        player.y + 12,
+        7,
+        7
+    );
+
+
+    /* Attack effect */
+
+    if (
+        player.attacking
+    ) {
+
+        ctx.strokeStyle =
+        "#facc15";
+
+        ctx.lineWidth = 5;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            player.x +
+            player.size / 2,
+            player.y +
+            player.size / 2,
+            65,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
     }
 
-    // Platform collision
-    if (player.velocityY > 0) {
-        platforms.forEach(platform => {
-            if (
-                player.x + player.width > platform.x &&
-                player.x < platform.x + platform.width &&
-                player.y + player.height >= platform.y &&
-                player.y + player.height <= platform.y + platform.height + 15
-            ) {
-                player.velocityY = -12;
-                score++;
-            }
-        });
-    }
+}
 
-    // Move platforms when player goes high
-    if (player.y < canvas.height * 0.35) {
-        const movement = canvas.height * 0.35 - player.y;
-        player.y = canvas.height * 0.35;
 
-        platforms.forEach(platform => {
-            platform.y += movement;
-        });
-    }
+/* ================= ATTACK ================= */
 
-    // Recycle clouds
-    platforms.forEach(platform => {
-        if (platform.y > canvas.height) {
-            platform.y = -30;
-            platform.x = Math.random() * (canvas.width - platform.width);
+function attack() {
+
+    if (
+        !gameRunning ||
+        player.attacking
+    ) return;
+
+
+    player.attacking = true;
+
+    player.attackTimer = 12;
+
+
+    monsters.forEach(
+    monster => {
+
+        const dx =
+        monster.x -
+        player.x;
+
+        const dy =
+        monster.y -
+        player.y;
+
+        const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+        if (
+            distance < 100
+        ) {
+
+            monster.health -= 50;
+
         }
+
     });
 
-    // Game over
-    if (player.y > canvas.height + 60) {
-        gameOver();
-    }
 }
+
+
+/* ================= MONSTERS ================= */
+
+function spawnMonster() {
+
+    const side =
+    Math.floor(
+        Math.random() * 4
+    );
+
+
+    let x;
+    let y;
+
+
+    if (side === 0) {
+
+        x = Math.random() *
+        canvas.width;
+
+        y = -50;
+
+    }
+
+    else if (side === 1) {
+
+        x = canvas.width + 50;
+
+        y = Math.random() *
+        canvas.height;
+
+    }
+
+    else if (side === 2) {
+
+        x = Math.random() *
+        canvas.width;
+
+        y = canvas.height + 50;
+
+    }
+
+    else {
+
+        x = -50;
+
+        y = Math.random() *
+        canvas.height;
+
+    }
+
+
+    monsters.push({
+
+        x: x,
+
+        y: y,
+
+        size: 40,
+
+        speed:
+        1 +
+        wave * 0.15,
+
+        health: 100
+
+    });
+
+}
+
+
+/* ================= SPAWN WAVE ================= */
+
+function spawnWave() {
+
+    const monsterAmount =
+    3 + wave;
+
+    for (
+        let i = 0;
+        i < monsterAmount;
+        i++
+    ) {
+
+        spawnMonster();
+
+    }
+
+}
+
+
+/* ================= UPDATE MONSTERS ================= */
+
+function updateMonsters() {
+
+    for (
+        let i =
+        monsters.length - 1;
+
+        i >= 0;
+
+        i--
+    ) {
+
+        const monster =
+        monsters[i];
+
+
+        const dx =
+        player.x -
+        monster.x;
+
+        const dy =
+        player.y -
+        monster.y;
+
+
+        const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+
+        if (
+            distance > 0
+        ) {
+
+            monster.x +=
+            (dx / distance) *
+            monster.speed;
+
+            monster.y +=
+            (dy / distance) *
+            monster.speed;
+
+        }
+
+
+        /* Remove dead monsters */
+
+        if (
+            monster.health <= 0
+        ) {
+
+            monsters.splice(
+                i,
+                1
+            );
+
+            score += 10;
+
+            continue;
+
+        }
+
+
+        /* Damage player */
+
+        if (
+            distance <
+            player.size
+        ) {
+
+            player.health -=
+            0.15;
+
+        }
+
+    }
+
+
+    /* Next wave */
+
+    if (
+        monsters.length === 0
+    ) {
+
+        wave++;
+
+        spawnWave();
+
+    }
+
+
+    /* Game over */
+
+    if (
+        player.health <= 0
+    ) {
+
+        endGame();
+
+    }
+
+}
+
+
+/* ================= DRAW MONSTERS ================= */
+
+function drawMonsters() {
+
+    monsters.forEach(
+    monster => {
+
+        /* Monster body */
+
+        ctx.fillStyle =
+        "#ef4444";
+
+        ctx.fillRect(
+            monster.x,
+            monster.y,
+            monster.size,
+            monster.size
+        );
+
+
+        /* Eyes */
+
+        ctx.fillStyle =
+        "white";
+
+        ctx.fillRect(
+            monster.x + 8,
+            monster.y + 10,
+            7,
+            7
+        );
+
+        ctx.fillRect(
+            monster.x + 25,
+            monster.y + 10,
+            7,
+            7
+        );
+
+
+        /* Health bar */
+
+        ctx.fillStyle =
+        "#450a0a";
+
+        ctx.fillRect(
+            monster.x,
+            monster.y - 10,
+            monster.size,
+            5
+        );
+
+
+        ctx.fillStyle =
+        "#22c55e";
+
+        ctx.fillRect(
+            monster.x,
+            monster.y - 10,
+            monster.size *
+            (monster.health / 100),
+            5
+        );
+
+    });
+
+}
+
+
+/* ================= UPDATE HUD ================= */
+
+function updateHUD() {
+
+    document
+    .getElementById("score")
+    .textContent =
+    score;
+
+
+    document
+    .getElementById("wave")
+    .textContent =
+    wave;
+
+
+    document
+    .getElementById("healthBar")
+    .style.width =
+    Math.max(
+        0,
+        player.health
+    ) + "%";
+
+}
+
+
+/* ================= BACKGROUND ================= */
 
 function drawBackground() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Decorative clouds
-    ctx.globalAlpha = 0.3;
-    drawCloud(50, 80, 160);
-    drawCloud(canvas.width - 200, 180, 160);
-    ctx.globalAlpha = 1;
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /* Arena grid */
+
+    ctx.strokeStyle =
+    "rgba(255,255,255,0.05)";
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let x = 0;
+        x < canvas.width;
+        x += 50
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, 0);
+
+        ctx.lineTo(
+            x,
+            canvas.height
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    for (
+        let y = 0;
+        y < canvas.height;
+        y += 50
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, y);
+
+        ctx.lineTo(
+            canvas.width,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
 }
 
+
+/* ================= GAME LOOP ================= */
+
 function gameLoop() {
-    if (!gameRunning) return;
+
+    if (
+        !gameRunning
+    ) return;
+
 
     drawBackground();
+
     updatePlayer();
 
-    platforms.forEach(platform => {
-        drawCloud(platform.x, platform.y, platform.width);
-    });
+    updateMonsters();
+
+    drawMonsters();
 
     drawPlayer();
 
-    document.getElementById("score").textContent =
-        "Score: " + score;
+    updateHUD();
 
-    requestAnimationFrame(gameLoop);
+
+    if (
+        player.attacking
+    ) {
+
+        player.attackTimer--;
+
+
+        if (
+            player.attackTimer <= 0
+        ) {
+
+            player.attacking =
+            false;
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
 }
 
-function gameOver() {
+
+/* ================= GAME OVER ================= */
+
+function endGame() {
+
     gameRunning = false;
 
-    document.getElementById("finalScore").textContent =
-        "Your Score: " + score;
+    alert(
+        "GAME OVER!\n\n" +
+        "Score: " + score +
+        "\nWave: " + wave
+    );
 
-    document.getElementById("gameOver").style.display = "block";
+    showScreen(
+        "mainMenu"
+    );
+
 }
 
-window.addEventListener("keydown", e => {
-    keys[e.key] = true;
-});
 
-window.addEventListener("keyup", e => {
-    keys[e.key] = false;
-});
+/* ================= ROOM SYSTEM ================= */
 
-// Mobile controls
-document.getElementById("left").addEventListener("pointerdown", () => {
-    keys["ArrowLeft"] = true;
-});
+function generateRoomID() {
 
-document.getElementById("left").addEventListener("pointerup", () => {
-    keys["ArrowLeft"] = false;
-});
+    const characters =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-document.getElementById("right").addEventListener("pointerdown", () => {
-    keys["ArrowRight"] = true;
-});
+    let id = "";
 
-document.getElementById("right").addEventListener("pointerup", () => {
-    keys["ArrowRight"] = false;
-});
 
-document.getElementById("restart").addEventListener("click", () => {
-    resetGame();
-    gameLoop();
-});
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
 
-resetGame();
-gameLoop();
+        id +=
+        characters.charAt(
+            Math.floor(
+                Math.random() *
+                characters.length
+            )
+        );
+
+    }
+
+    return id;
+
+}
+
+
+let currentRoomID = "";
+
+
+function createRoom() {
+
+    currentRoomID =
+    generateRoomID();
+
+
+    document
+    .getElementById(
+        "roomIdDisplay"
+    )
+    .textContent =
+    currentRoomID;
+
+
+    showScreen(
+        "createRoomMenu"
+    );
+
+}
+
+
+function joinRoom() {
+
+    const roomID =
+    document
+    .getElementById(
+        "roomInput"
+    )
+    .value
+    .toUpperCase()
+    .trim();
+
+
+    if (
+        roomID.length < 3
+    ) {
+
+        alert(
+            "Please enter a valid Room ID."
+        );
+
+        return;
+
+    }
+
+
+    currentRoomID =
+    roomID;
+
+
+    alert(
+        "Joined Room: " +
+        currentRoomID +
+        "\n\nOnline multiplayer will be connected next!"
+    );
+
+
+    startMultiplayerDemo();
+
+}
+
+
+function startMultiplayerDemo() {
+
+    multiplayerMode = true;
+
+    startGame();
+
+}
+
+
+/* ================= HOW TO PLAY ================= */
+
+function showHowToPlay() {
+
+    alert(
+        "HOW TO PLAY\n\n" +
+        "WASD or Arrow Keys = Move\n" +
+        "SPACE = Attack\n\n" +
+        "Defeat monsters to earn points.\n" +
+        "Survive as many waves as possible!"
+    );
+
+}
+
+
+/* ================= MOBILE CONTROLS ================= */
+
+function holdButton(
+id,
+key
+) {
+
+    const button =
+    document.getElementById(id);
+
+
+    button.addEventListener(
+    "pointerdown",
+    () => {
+
+        keys[key] =
+        true;
+
+    });
+
+
+    button.addEventListener(
+    "pointerup",
+    () => {
+
+        keys[key] =
+        false;
+
+    });
+
+
+    button.addEventListener(
+    "pointercancel",
+    () => {
+
+        keys[key] =
+        false;
+
+    });
+
+}
+
+
+holdButton(
+"leftButton",
+"arrowleft"
+);
+
+holdButton(
+"rightButton",
+"arrowright"
+);
+
+
+document
+.getElementById(
+"attackButton"
+)
+.addEventListener(
+"pointerdown",
+attack
+);
+
 </script>
 
 </body>
