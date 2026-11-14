@@ -552,140 +552,99 @@ function createGround() {
 
 function loadPlayer() {
 
-    const loader =
-    new GLTFLoader();
-
+    const loader = new GLTFLoader();
 
     loader.load(
 
         "./assets/HeavyWarrior.glb",
 
-
         function(gltf) {
 
-            player =
-            gltf.scene;
+            console.log("SUCCESS! Heavy Warrior loaded!");
 
+            player = gltf.scene;
 
-            /* SCALE CHARACTER */
+            player.scale.set(1, 1, 1);
 
-            player.scale.set(
-                1.5,
-                1.5,
-                1.5
-            );
+            player.position.set(0, 0, 0);
 
+            player.traverse(function(object) {
 
-            player.position.set(
-                0,
-                0,
-                0
-            );
+                if (object.isMesh) {
 
-
-            /* SHADOWS */
-
-            player.traverse(
-            function(object) {
-
-                if (
-                    object.isMesh
-                ) {
-
-                    object.castShadow =
-                    true;
-
-                    object.receiveShadow =
-                    true;
+                    object.castShadow = true;
+                    object.receiveShadow = true;
 
                 }
 
             });
 
-
             scene.add(player);
 
+            mixer = new THREE.AnimationMixer(player);
 
-            /* ANIMATIONS */
+            console.log("Available animations:");
 
-            mixer =
-            new THREE.AnimationMixer(
-                player
-            );
+            gltf.animations.forEach(function(clip) {
 
+                console.log(clip.name);
 
-            console.log(
-                "ANIMATIONS:"
-            );
-
-
-            gltf.animations.forEach(
-            clip => {
-
-                console.log(
-                    clip.name
-                );
-
-
-                animations[
-                    clip.name.toLowerCase()
-                ] =
-                mixer.clipAction(
-                    clip
-                );
+                animations[clip.name.toLowerCase()] =
+                    mixer.clipAction(clip);
 
             });
 
-
-            /* START FIRST ANIMATION */
-
-            if (
-                gltf.animations.length > 0
-            ) {
+            if (gltf.animations.length > 0) {
 
                 currentAction =
-                mixer.clipAction(
-                    gltf.animations[0]
-                );
-
+                    mixer.clipAction(gltf.animations[0]);
 
                 currentAction.play();
 
             }
 
-
-            document
-            .getElementById("loading")
-            .style.display =
-            "none";
+            document.getElementById("loading").style.display = "none";
 
         },
 
+        function(xhr) {
 
-        undefined,
+            if (xhr.total > 0) {
 
+                const percent =
+                    Math.round((xhr.loaded / xhr.total) * 100);
+
+                document.getElementById("loading").innerHTML =
+                    "Loading Heavy Warrior... " + percent + "%";
+
+            } else {
+
+                document.getElementById("loading").innerHTML =
+                    "Loading Heavy Warrior...";
+
+            }
+
+        },
 
         function(error) {
 
-            console.error(error);
+            console.error("ERROR LOADING MODEL:", error);
 
-
-            document
-            .getElementById("loading")
-            .innerHTML =
-
-            "❌ Cannot load HeavyWarrior.glb<br><br>" +
-
-            "Make sure the file is here:<br>" +
-
-            "assets/HeavyWarrior.glb";
+            document.getElementById("loading").innerHTML = `
+                ❌ ERROR LOADING CHARACTER
+                <br><br>
+                Make sure this file exists:
+                <br>
+                <b>assets/HeavyWarrior.glb</b>
+                <br><br>
+                Check the browser console for details.
+            `;
 
         }
 
     );
 
 }
-
 
 /* =====================================
    PLAYER MOVEMENT
