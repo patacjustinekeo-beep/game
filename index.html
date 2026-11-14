@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Jumper</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        touch-action: none;
+    }
+
+    body {
+        overflow: hidden;
+        background: linear-gradient(#69c7ff, #dff6ff);
+        font-family: Arial, sans-serif;
+    }
+
+    canvas {
+        display: block;
+        margin: auto;
+        background: linear-gradient(#65c5ff, #e8f9ff);
+    }
+
+    #score {
+        position: fixed;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px #333;
+        z-index: 10;
+    }
+
+    #controls {
+        position: fixed;
+        bottom: 25px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 35px;
+    }
+
+    button {
+        width: 75px;
+        height: 75px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.75);
+        font-size: 30px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+        transform: scale(0.92);
+    }
+
+    #gameOver {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        background: rgba(255,255,255,0.9);
+        padding: 30px;
+        border-radius: 20px;
+        z-index: 20;
+    }
+
+    #gameOver h1 {
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    #restart {
+        width: auto;
+        height: auto;
+        border-radius: 10px;
+        padding: 12px 25px;
+        background: #4caf50;
+        color: white;
+        font-size: 18px;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="score">Score: 0</div>
+
+<div id="gameOver">
+    <h1>Game Over!</h1>
+    <p id="finalScore"></p>
+    <br>
+    <button id="restart">Play Again</button>
+</div>
+
+<canvas id="game"></canvas>
+
+<div id="controls">
+    <button id="left">⬅</button>
+    <button id="right">➡</button>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+const player = {
+    x: 0,
+    y: 0,
+    width: 40,
+    height: 50,
+    velocityX: 0,
+    velocityY: -12,
+    speed: 0.7,
+    maxSpeed: 7,
+    gravity: 0.5
+};
+
+let platforms = [];
+let score = 0;
+let gameRunning = true;
+let keys = {};
+
+function createPlatforms() {
+    platforms = [];
+
+    for (let i = 0; i < 8; i++) {
+        platforms.push({
+            x: Math.random() * (canvas.width - 120),
+            y: canvas.height - (i * 110) - 40,
+            width: 110,
+            height: 22
+        });
+    }
+}
+
+function resetGame() {
+    player.x = canvas.width / 2 - player.width / 2;
+    player.y = canvas.height - 150;
+    player.velocityX = 0;
+    player.velocityY = -12;
+
+    score = 0;
+    gameRunning = true;
+
+    createPlatforms();
+
+    document.getElementById("gameOver").style.display = "none";
+}
+
+function drawCloud(x, y, width) {
+    ctx.fillStyle = "white";
+
+    ctx.beginPath();
+    ctx.arc(x + 25, y + 15, 20, 0, Math.PI * 2);
+    ctx.arc(x + 50, y + 5, 25, 0, Math.PI * 2);
+    ctx.arc(x + 80, y + 15, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillRect(x + 20, y + 15, width - 40, 20);
+}
+
+function drawPlayer() {
+    // Character body
+    ctx.fillStyle = "#ff5252";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Face
+    ctx.fillStyle = "#ffe0bd";
+    ctx.beginPath();
+    ctx.arc(
+        player.x + player.width / 2,
+        player.y + 15,
+        13,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = "#222";
+    ctx.fillRect(player.x + 12, player.y + 12, 3, 5);
+    ctx.fillRect(player.x + 25, player.y + 12, 3, 5);
+}
+
+function updatePlayer() {
+    if (keys["ArrowLeft"] || keys["a"]) {
+        player.velocityX -= player.speed;
+    }
+
+    if (keys["ArrowRight"] || keys["d"]) {
+        player.velocityX += player.speed;
+    }
+
+    player.velocityX *= 0.85;
+
+    if (player.velocityX > player.maxSpeed) {
+        player.velocityX = player.maxSpeed;
+    }
+
+    if (player.velocityX < -player.maxSpeed) {
+        player.velocityX = -player.maxSpeed;
+    }
+
+    player.velocityY += player.gravity;
+
+    player.x += player.velocityX;
+    player.y += player.velocityY;
+
+    // Screen boundaries
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) {
+        player.x = canvas.width - player.width;
+    }
+
+    // Platform collision
+    if (player.velocityY > 0) {
+        platforms.forEach(platform => {
+            if (
+                player.x + player.width > platform.x &&
+                player.x < platform.x + platform.width &&
+                player.y + player.height >= platform.y &&
+                player.y + player.height <= platform.y + platform.height + 15
+            ) {
+                player.velocityY = -12;
+                score++;
+            }
+        });
+    }
+
+    // Move platforms when player goes high
+    if (player.y < canvas.height * 0.35) {
+        const movement = canvas.height * 0.35 - player.y;
+        player.y = canvas.height * 0.35;
+
+        platforms.forEach(platform => {
+            platform.y += movement;
+        });
+    }
+
+    // Recycle clouds
+    platforms.forEach(platform => {
+        if (platform.y > canvas.height) {
+            platform.y = -30;
+            platform.x = Math.random() * (canvas.width - platform.width);
+        }
+    });
+
+    // Game over
+    if (player.y > canvas.height + 60) {
+        gameOver();
+    }
+}
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Decorative clouds
+    ctx.globalAlpha = 0.3;
+    drawCloud(50, 80, 160);
+    drawCloud(canvas.width - 200, 180, 160);
+    ctx.globalAlpha = 1;
+}
+
+function gameLoop() {
+    if (!gameRunning) return;
+
+    drawBackground();
+    updatePlayer();
+
+    platforms.forEach(platform => {
+        drawCloud(platform.x, platform.y, platform.width);
+    });
+
+    drawPlayer();
+
+    document.getElementById("score").textContent =
+        "Score: " + score;
+
+    requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    gameRunning = false;
+
+    document.getElementById("finalScore").textContent =
+        "Your Score: " + score;
+
+    document.getElementById("gameOver").style.display = "block";
+}
+
+window.addEventListener("keydown", e => {
+    keys[e.key] = true;
+});
+
+window.addEventListener("keyup", e => {
+    keys[e.key] = false;
+});
+
+// Mobile controls
+document.getElementById("left").addEventListener("pointerdown", () => {
+    keys["ArrowLeft"] = true;
+});
+
+document.getElementById("left").addEventListener("pointerup", () => {
+    keys["ArrowLeft"] = false;
+});
+
+document.getElementById("right").addEventListener("pointerdown", () => {
+    keys["ArrowRight"] = true;
+});
+
+document.getElementById("right").addEventListener("pointerup", () => {
+    keys["ArrowRight"] = false;
+});
+
+document.getElementById("restart").addEventListener("click", () => {
+    resetGame();
+    gameLoop();
+});
+
+resetGame();
+gameLoop();
+</script>
+
+</body>
+</html>
